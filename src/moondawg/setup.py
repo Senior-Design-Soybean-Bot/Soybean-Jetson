@@ -26,6 +26,7 @@ setup(
             'xbox_translator = moondawg.xbox_translator:main',
             'serial_bridge = moondawg.serial_bridge:main',
             'diagnostics = moondawg.diagnostics:main',
+            'gps_publisher = moondawg.gps_publisher:main',
         ],
     },
 )

@@ -32,6 +32,12 @@ def generate_launch_description():
             executable='diagnostics',
             name='diagnostics',
             output='screen'
+        ),
+        Node(
+            package='moondawg',
+            executable='gps_publisher',
+            name='gps_publisher',
+            output='screen'
         )
     ])
 
