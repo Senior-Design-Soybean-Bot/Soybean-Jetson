@@ -55,6 +55,11 @@ var imageTopic = new ROSLIB.Topic({
     name: '/compressed_image',
     messageType: 'std_msgs/String'
 });
+var gpsTopic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/gps',
+    messageType: 'std_msgs/String'
+});
 
 // Subscribe to topics
 imageTopic.subscribe(function(message) {
@@ -65,6 +70,9 @@ axisTopic.subscribe(function(message) {
 });
 buttonTopic.subscribe(function(message) {
     document.getElementById('button-display').innerHTML = message.data;
+});
+gpsTopic.subscribe(function(message) {
+    document.getElementById('gps-display').innerHTML = message.data;
 });
 
 // Connect gamepad
