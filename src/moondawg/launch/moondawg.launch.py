@@ -38,6 +38,12 @@ def generate_launch_description():
             executable='gps_publisher',
             name='gps_publisher',
             output='screen'
+        ),
+        Node(
+            package='moondawg',
+            executable='image_capture',
+            name='image_capture',
+            output='screen'
         )
     ])
 
