@@ -72,6 +72,7 @@ buttonTopic.subscribe(function(message) {
     document.getElementById('button-display').innerHTML = message.data;
 });
 gpsTopic.subscribe(function(message) {
+    var gpsData = JSON.parse(message.data)
     var lat = message.latitude.toFixed(6);
     var lon = message.longitude.toFixed(6);
     var gpsString = 'Lat: ${lat}, Lon: ${lon}'

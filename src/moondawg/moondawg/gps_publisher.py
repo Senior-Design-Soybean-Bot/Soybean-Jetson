@@ -1,13 +1,16 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
+from std_msgs.msg import String
 import serial
 import pynmea2
+import json
 
 class GPSPublisher(Node):
     def __init__(self):
         super().__init__('gps_publisher')
         self.publisher_ = self.create_publisher(NavSatFix, 'gps_coordinates', 10)
+        self.web_publisher_ = self.create_publisher(String, 'gps', 10)
 
         # Connect to the USB GPS device
         # You may need to change the port and baud rate to match your device
@@ -31,6 +34,15 @@ class GPSPublisher(Node):
                     gps_msg.longitude = msg.longitude
 
                     self.publisher_.publish(gps_msg)
+
+                    web_data = {
+                        'Latitude': msg.latitude,
+                        'Longitude': msg.longitude
+                    }
+                    web_msg = String()
+                    web_msg.data = json.dumps(web_data)
+                    self.web_publisher_.publish(web_msg)
+
                     self.get_logger().info(f'Published GPS: Lat {msg.latitude}, Lon {msg.longitude}')
                 else:
                     self.get_logger().warn('No valid GPS fix yet.')
