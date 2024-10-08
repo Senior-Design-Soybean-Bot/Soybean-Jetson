@@ -52,13 +52,13 @@ var diagnosticTopic = new ROSLIB.Topic({ // Diagnostics not yet used
 });
 var imageTopic = new ROSLIB.Topic({
     ros: ros,
-    name: '/compressed_image',
-    messageType: 'std_msgs/String'
+    name: '/image',
+    messageType: 'sensor_msg/Image'
 });
 var gpsTopic = new ROSLIB.Topic({
     ros: ros,
-    name: '/gps',
-    messageType: 'std_msgs/String'
+    name: '/fix',
+    messageType: 'sensor_msgs/NavSatFix'
 });
 
 // Subscribe to topics
@@ -72,11 +72,10 @@ buttonTopic.subscribe(function(message) {
     document.getElementById('button-display').innerHTML = message.data;
 });
 gpsTopic.subscribe(function(message) {
-    var gpsData = JSON.parse(message.data)
     var lat = message.latitude.toFixed(6);
     var lon = message.longitude.toFixed(6);
-    var gpsString = 'Lat: ${lat}, Lon: ${lon}'
-    document.getElementById('gps-display').innerHTML = message.data;
+    var gpsString = 'Lat: ${lat}, Lon: ${lon}';
+    document.getElementById('gps-display').innerHTML = gpsString;
 });
 
 // Connect gamepad

@@ -9,12 +9,24 @@ def generate_launch_description():
             name='websocket',
             output='screen'
         ),
-        # Node(
-        #     package='image_tools',
-        #     executable='cam2image',
-        #     name='cam2image',
-        #     output='screen'
-        # ),
+        Node(
+            package='image_tools',
+            executable='cam2image',
+            name='cam2image',
+            output='screen'
+        ),
+        Node(
+            package='ublox_gps',
+            executable='ublox_gps_node',
+            name='ublox_gps',
+            parameters=[{
+                'device': '/dev/ttyACM0',
+                'frame_id': 'gps',
+                'uart1.baudrate': 9600,
+                'nav_rate': 10,
+                'rate': 10.0,
+            }]
+        ),
         Node(
             package='moondawg',
             executable='xbox_translator',
@@ -32,13 +44,6 @@ def generate_launch_description():
             executable='diagnostics',
             name='diagnostics',
             output='screen'
-        ),
-        Node(
-            package='moondawg',
-            executable='gps_publisher',
-            name='gps_publisher',
-            output='screen',
-            parameters=[{'port': '/dev/ttyACM0', 'baud': 9600}]
         ),
         Node(
             package='moondawg',
