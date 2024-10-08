@@ -2,18 +2,35 @@
 <html>
 <head>
     <title>Xbox ROS Interface</title>
+    <style>
+        #gps-display {
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 5px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <h1>Xbox controller panel</h1>
-    <div id="axis-display"></div>
-    <div id="button-display"></div>
+    <div>
+        <h2>Controller Data:</h2>
+        <div>Axes: <span id="axis-display"></span></div>
+        <div>Buttons: <span id="button-display"></span></div>
+    </div>
     <div id="diagnostic-display"></div>
     <button id="subscribe-button">Subscribe</button>
-    <div id="gps-display">Waiting for GPS data...</div>
-    <br><br>
-    <img src="novideo.png" id="video_out" width="800" height="600"></img>
+    <div>
+        <h2>GPS Coordinates:</h2>
+        <div id="gps-display">Waiting for GPS data...</div>
+    </div>
+    <div>
+        <h2>Camera Feed:</h2>
+        <img src="novideo.png" id="video_out" width="800" height="600" alt="Camera Feed">
+    </div>
 
     <script src="roslib.min.js"></script>
-    <script src="script.js"></script> </body>
+    <script src="script.js"></script>
+</body>
 </html>
-

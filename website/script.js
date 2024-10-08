@@ -72,6 +72,9 @@ buttonTopic.subscribe(function(message) {
     document.getElementById('button-display').innerHTML = message.data;
 });
 gpsTopic.subscribe(function(message) {
+    var lat = message.latitude.toFixed(6);
+    var lon = message.longitude.toFixed(6);
+    var gpsString = 'Lat: ${lat}, Lon: ${lon}'
     document.getElementById('gps-display').innerHTML = message.data;
 });
 

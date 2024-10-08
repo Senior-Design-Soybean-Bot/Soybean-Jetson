@@ -9,12 +9,12 @@ def generate_launch_description():
             name='websocket',
             output='screen'
         ),
-        Node(
-            package='image_tools',
-            executable='cam2image',
-            name='cam2image',
-            output='screen'
-        ),
+        # Node(
+        #     package='image_tools',
+        #     executable='cam2image',
+        #     name='cam2image',
+        #     output='screen'
+        # ),
         Node(
             package='moondawg',
             executable='xbox_translator',
@@ -37,13 +37,16 @@ def generate_launch_description():
             package='moondawg',
             executable='gps_publisher',
             name='gps_publisher',
-            output='screen'
+            output='screen',
+            parameters=[{'port': '/dev/ttyACM0', 'baud': 9600}]
         ),
         Node(
             package='moondawg',
             executable='image_capture',
             name='image_capture',
-            output='screen'
+            output='screen',
+            parameters=[{'image_dir': '/Pictures'},
+                        {'include_date': True}]
         )
     ])
 

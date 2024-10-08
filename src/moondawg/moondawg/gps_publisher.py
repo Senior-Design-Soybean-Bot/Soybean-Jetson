@@ -1,16 +1,19 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
-import gps
+from sensor_msgs.msg import NavSatFix
+import serial
+import pynmea2
 
 class GPSPublisher(Node):
     def __init__(self):
         super().__init__('gps_publisher')
-        self.publisher_ = self.create_publisher(String, 'gps_coordinates', 10)
+        self.publisher_ = self.create_publisher(NavSatFix, 'gps_coordinates', 10)
 
-        # Connect to local gpsd daemon
-        self.gpsd = gps.gps(mode=gps.WATCH_ENABLE)
-        self.gpsd.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+        # Connect to the USB GPS device
+        # You may need to change the port and baud rate to match your device
+        self.declare_parameter('port', '/dev/ttyACM0')
+        port = self.get_parameter('port').value
+        self.serial_port = serial.Serial(port, 9600, timeout=1)
 
         # Timer to publish GPS data periodically
         timer_period = 1.0 # seconds
@@ -19,25 +22,24 @@ class GPSPublisher(Node):
 
     def publish_gps_coordinates(self):
         try:
-            report = self.gpsd.next()
-            if report['class'] == 'TPV':
-                latitude = getattr(report, 'lat', 'nan')
-                longitude = getattr(report, 'lon', 'nan')
-                altitude = getattr(report, 'alt', 'nan')
+            line = self.serial_port.readline().decode('ascii', errors='replace').strip()
+            if line.startswith('$GPGGA'):
+                msg = pynmea2.parse(line)
+                if msg.lattitude and msg.longitude:
+                    gps_msg = NavSatFix()
+                    gps_msg.latitude = msg.latitude
+                    gps_msg.longitude = msg.longitude
 
-                if latitude != 'nan' and longitude != 'nan':
-                    gps_data = f'Latitude: {latitude}, Longitude: {longitude}, Altitude: {altitude} meters'
-                    self.publisher_.publish(String(data=gps_data))
-                    self.get_logger().info(f'Published GPS: {gps_data}')
+                    self.publisher_.publish(gps_msg)
+                    self.get_logger().info(f'Published GPS: Lat {msg.latitude}, Lon {msg.longitude}')
                 else:
                     self.get_logger().warn('No valid GPS fix yet.')
 
-        except KeyError:
-            # If the report doesn't have the expected fields
-            self.get_logger().warn('Incomplete GPS data.')
+        except serial.SerialException as e:
+            self.get_logger().error(f'Serial port error: {e}')
 
-        except StopIteration:
-            self.get_logger().warn('GPSD has terminated the stream.')
+        except pynmea2.ParseError as e:
+            self.get_logger().warn(f'NMEA parse error: {e}')
 
         except Exception as e:
             self.get_logger().error(f'Error reading GPS data: {e}')
@@ -50,10 +52,10 @@ def main(args=None):
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
-    
-
-    node.destroy_node()
-    rclpy.shutdown()
+    finally:
+        node.serial_port.close()
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
