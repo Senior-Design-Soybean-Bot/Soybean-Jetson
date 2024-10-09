@@ -10,6 +10,24 @@
             border: 1px solid #ccc;
             background-color: #f0f0f0;
         }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-container {
+            text-align: center;
+        }
+        .image-container img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+        }
+        .image-filenmae {
+            margin-top: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -25,10 +43,35 @@
         <h2>GPS Coordinates:</h2>
         <div id="gps-display">Waiting for GPS data...</div>
     </div>    
+<!--
+    Add back when we have a camera for the driver
     <div>
         <h2>Camera Feed:</h2>
         <img src="novideo.png" id="video_out" width="800" height="600" alt="Camera Feed">
     </div>    
+-->
+
+    <div>
+        <h2>Last Captured Images:</h2>
+        <div class="image-grid">
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_1" alt="Last Captured Image 1">
+                <div class="image-filename" id="filename_1">Filename 1</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_2" alt="Last Captured Image 2">
+                <div class="image-filename" id="filename_2">Filename 2</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_3" alt="Last Captured Image 3">
+                <div class="image-filename" id="filename_3">Filename 3</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_4" alt="Last Captured Image 4">
+                <div class="image-filename" id="filename_4">Filename 4</div>
+            </div>
+        </div>
+    </div>
 
     <script src="roslib.min.js"></script>
     <script src="script.js"></script>

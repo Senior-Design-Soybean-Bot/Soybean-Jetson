@@ -60,11 +60,24 @@ var gpsTopic = new ROSLIB.Topic({
     name: '/fix',
     messageType: 'sensor_msgs/NavSatFix'
 });
+var ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+});
+var lastImageTopic = new ROSLIB.Topic({
+    ros : ros,
+    name : '/last_captured_image',
+    messageType : '2x2_array/LastCapturedImages'
+});
+
+var imageIndex = 1;
 
 // Subscribe to topics
+/* 
 imageTopic.subscribe(function(message) {
     document.getElementById("video_out").src = "data:image/jpeg;base64," + message.data;
-});
+}); 
+*/
+
 axisTopic.subscribe(function(message) {
     document.getElementById('axis-display').innerHTML = message.data;
 });
@@ -77,6 +90,18 @@ gpsTopic.subscribe(function(message) {
     var gpsString = `Lat: ${lat}, Lon: ${lon}`;
     document.getElementById('gps-display').innerHTML = gpsString;
 });
+lastImageTopic.subscribe(function(message){
+    for (var i = 0; i < message.images.length; i++){
+        var imageId = 'last_captured_image_' + imageIndex;
+        var filenmaeId = 'filename_' + imageIndex;
+
+        document.getElementById(imageId).src = "data:image/jepg;base64," + message.images[i];
+        document.getElementById(filenmaeId).textContent = message.filenames[i];
+
+        imageIndex = (imageIndex % 4) + 1;
+    }
+
+}); 
 
 // Connect gamepad
 window.addEventListener("gamepadconnected", function(e) {

@@ -3,6 +3,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image, NavSatFix
 from cv_bridge import CvBridge
 import cv2
+from collections import deque
+from moondawg.msg import LastCapturedImages
 
 class ImageCapture(Node):
     def __init__(self):
@@ -10,6 +12,8 @@ class ImageCapture(Node):
         self.cv_bridge = CvBridge()
         self.gps_data = None
         self.latest_image = None
+        self.last_images = deque(maxlen=4)
+        self.last_filenames = deque(maxlen=4)
 
         self.create_subscription(Image, '/image', self.image_callback, 10)
         self.create_subscription(NavSatFix, '/fix', self.gps_callback, 10)
@@ -32,6 +36,22 @@ class ImageCapture(Node):
 
             cv2.imwrite(filename, self.latest_image)
             self.get_logger().info(f'Saved image: {filename}')
+
+            self.last_images.appendLeft(self.latest_image)
+            self.last_filenames.appendleft(filename)
+
+            self.publish_last_images()
+
+    def publish_last_images(self):
+        msg = LastCapturedImages()
+        msg.images = []
+        msg.filenames = list(self.last_filenames)
+
+        for img in self.last_images:
+            img_msg = self.cv_bridge.cv2_to_imgmsg(img, encoding='bgr8')
+            msg.images.append(img_msg)
+
+        self.last_images_publisher.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
