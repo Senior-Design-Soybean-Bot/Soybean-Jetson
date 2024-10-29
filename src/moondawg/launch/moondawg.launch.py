@@ -37,7 +37,13 @@ def generate_launch_description():
             package='moondawg',
             executable='i2c_bridge',
             name='i2c_bridge',
-            output='screen'
+            parameters=[{
+                'bus_number': 1,
+                'address1': 0x08,
+                'address2': 0x09
+            }],
+            output='screen',
+            emulate_tty=True
         ),
         Node(
             package='moondawg',
