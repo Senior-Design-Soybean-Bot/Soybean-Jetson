@@ -35,8 +35,8 @@ def generate_launch_description():
         ),
         Node(
             package='moondawg',
-            executable='serial_bridge',
-            name='serial_bridge',
+            executable='i2c_bridge',
+            name='i2c_bridge',
             output='screen'
         ),
         Node(
