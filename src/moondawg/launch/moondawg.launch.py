@@ -39,8 +39,7 @@ def generate_launch_description():
             name='i2c_bridge',
             parameters=[{
                 'bus_number': 1,
-                'address1': 0x08,
-                'address2': 0x09
+                'address1': 0x08
             }],
             output='screen',
             emulate_tty=True
