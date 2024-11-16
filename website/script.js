@@ -1,5 +1,5 @@
 // Parameters - change these to match the Pi
-var ip = "131.230.197.82"; // IP of the Pi
+var ip = "192.168.48.128"; // IP of the Pi
 var port = "9090"; // Port of webserver node
 
 var gamepad_axis_prev = "null";
@@ -52,20 +52,56 @@ var diagnosticTopic = new ROSLIB.Topic({ // Diagnostics not yet used
 });
 var imageTopic = new ROSLIB.Topic({
     ros: ros,
-    name: '/compressed_image',
-    messageType: 'std_msgs/String'
+    name: '/image',
+    messageType: 'sensor_msg/Image'
+});
+var gpsTopic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/fix',
+    messageType: 'sensor_msgs/NavSatFix'
+});
+var ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+});
+var lastImageTopic = new ROSLIB.Topic({
+    ros : ros,
+    name : '/last_captured_image',
+    messageType : '2x2_array/LastCapturedImages'
 });
 
+var imageIndex = 1;
+
 // Subscribe to topics
+/* 
 imageTopic.subscribe(function(message) {
     document.getElementById("video_out").src = "data:image/jpeg;base64," + message.data;
-});
+}); 
+*/
+
 axisTopic.subscribe(function(message) {
     document.getElementById('axis-display').innerHTML = message.data;
 });
 buttonTopic.subscribe(function(message) {
     document.getElementById('button-display').innerHTML = message.data;
 });
+gpsTopic.subscribe(function(message) {
+    var lat = message.latitude.toFixed(6);
+    var lon = message.longitude.toFixed(6);
+    var gpsString = `Lat: ${lat}, Lon: ${lon}`;
+    document.getElementById('gps-display').innerHTML = gpsString;
+});
+lastImageTopic.subscribe(function(message){
+    for (var i = 0; i < message.images.length; i++){
+        var imageId = 'last_captured_image_' + imageIndex;
+        var filenmaeId = 'filename_' + imageIndex;
+
+        document.getElementById(imageId).src = "data:image/jepg;base64," + message.images[i];
+        document.getElementById(filenmaeId).textContent = message.filenames[i];
+
+        imageIndex = (imageIndex % 4) + 1;
+    }
+
+}); 
 
 // Connect gamepad
 window.addEventListener("gamepadconnected", function(e) {

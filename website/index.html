@@ -2,17 +2,78 @@
 <html>
 <head>
     <title>Xbox ROS Interface</title>
+    <style>
+        #gps-display {
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 5px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-container {
+            text-align: center;
+        }
+        .image-container img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+        }
+        .image-filenmae {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <h1>Xbox controller panel</h1>
-    <div id="axis-display"></div>
-    <div id="button-display"></div>
+    <div>
+        <h2>Controller Data:</h2>
+        <div>Axes: <span id="axis-display"></span></div>
+        <div>Buttons: <span id="button-display"></span></div>
+    </div>
     <div id="diagnostic-display"></div>
     <button id="subscribe-button">Subscribe</button>
-    <br><br>
-    <img src="novideo.png" id="video_out" width="800" height="600"></img>
+    <div>
+        <h2>GPS Coordinates:</h2>
+        <div id="gps-display">Waiting for GPS data...</div>
+    </div>    
+<!--
+    Add back when we have a camera for the driver
+    <div>
+        <h2>Camera Feed:</h2>
+        <img src="novideo.png" id="video_out" width="800" height="600" alt="Camera Feed">
+    </div>    
+-->
+
+    <div>
+        <h2>Last Captured Images:</h2>
+        <div class="image-grid">
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_1" alt="Last Captured Image 1">
+                <div class="image-filename" id="filename_1">Filename 1</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_2" alt="Last Captured Image 2">
+                <div class="image-filename" id="filename_2">Filename 2</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_3" alt="Last Captured Image 3">
+                <div class="image-filename" id="filename_3">Filename 3</div>
+            </div>
+            <div class="image-container">
+                <img src="placeholder.png" id="last_captured_image_4" alt="Last Captured Image 4">
+                <div class="image-filename" id="filename_4">Filename 4</div>
+            </div>
+        </div>
+    </div>
 
     <script src="roslib.min.js"></script>
-    <script src="script.js"></script> </body>
+    <script src="script.js"></script>
+</body>
 </html>
-
