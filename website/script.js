@@ -1,5 +1,5 @@
 // Parameters - change these to match the Pi
-var ip = "192.168.48.128"; // IP of the Pi
+var ip = "192.168.4.255"; // IP of the Pi
 var port = "9090"; // Port of webserver node
 
 var gamepad_axis_prev = "null";
@@ -45,16 +45,6 @@ var buttonTopic = new ROSLIB.Topic({
     name: '/gamepad_button',
     messageType: 'std_msgs/Int8MultiArray'
 });
-var diagnosticTopic = new ROSLIB.Topic({ // Diagnostics not yet used
-    ros: ros,
-    name: '/diagnostics',
-    messageType: 'diagnostic_msgs/DiagnosticArray'
-});
-var imageTopic = new ROSLIB.Topic({
-    ros: ros,
-    name: '/image',
-    messageType: 'sensor_msg/Image'
-});
 var gpsTopic = new ROSLIB.Topic({
     ros: ros,
     name: '/fix',
@@ -63,20 +53,25 @@ var gpsTopic = new ROSLIB.Topic({
 var ros = new ROSLIB.Ros({
     url : 'ws://localhost:9090'
 });
-var lastImageTopic = new ROSLIB.Topic({
+const NUM_IMAGES = 4;
+let imageContainer = document.getElementById('image-container');
+let imageElements = [];
+
+for (let i = 0; i < NUM_IMAGES; i++) {
+    let imgDiv = document.createElement('div');
+    imgDiv.className = 'image-box';
+    let img = document.createElement('img');
+    img.style.width = '300px';
+    imgDiv.appendChild(img);
+    imageContainer.appendChild(imgDiv);
+    imageElements.push(img);
+}
+var imageTopic = new ROSLIB.Topic({
     ros : ros,
-    name : '/last_captured_image',
-    messageType : '2x2_array/LastCapturedImages'
+    name : '/camera/image/compressed',
+    messageType : 'sensor_msgs/CompressedImage'
 });
 
-var imageIndex = 1;
-
-// Subscribe to topics
-/* 
-imageTopic.subscribe(function(message) {
-    document.getElementById("video_out").src = "data:image/jpeg;base64," + message.data;
-}); 
-*/
 
 axisTopic.subscribe(function(message) {
     document.getElementById('axis-display').innerHTML = message.data;
@@ -90,17 +85,13 @@ gpsTopic.subscribe(function(message) {
     var gpsString = `Lat: ${lat}, Lon: ${lon}`;
     document.getElementById('gps-display').innerHTML = gpsString;
 });
-lastImageTopic.subscribe(function(message){
-    for (var i = 0; i < message.images.length; i++){
-        var imageId = 'last_captured_image_' + imageIndex;
-        var filenmaeId = 'filename_' + imageIndex;
-
-        document.getElementById(imageId).src = "data:image/jepg;base64," + message.images[i];
-        document.getElementById(filenmaeId).textContent = message.filenames[i];
-
-        imageIndex = (imageIndex % 4) + 1;
+imageTopic.subscribe(function(message){
+    const imageDat = "data:image/jpeg;base64," + message.data;
+    
+    for (let i = imageElements.length - 1; i > 0; i--) {
+        imageElements[i].src = imageElements[i-1].src;
     }
-
+    imageElements[0].src = imageData;
 }); 
 
 // Connect gamepad
@@ -109,15 +100,14 @@ window.addEventListener("gamepadconnected", function(e) {
     setInterval(readControllerData, 75); // Read from controller every 75 ms
 });
 
+let lastAxisData = null;
+let lastButtonData = null;
+
 // Function to be called every time the controlled is read from
 function readControllerData() {
     var gamepad = navigator.getGamepads()[0]; // Assuming the first connected gamepad
     
-    if (gamepad == undefined) {
-	    return;
-	}
-
-    if (!ros.isConnected) {
+    if (!gamepade || !ros.isConnected) {
         return;
     }
 

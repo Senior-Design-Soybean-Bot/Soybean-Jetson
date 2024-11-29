@@ -17,7 +17,7 @@ class I2CBridge(Node):
         self.diag_topic = self.create_publisher(DiagnosticStatus, 'i2c_bridge_diag', 10)
         self.heartbeat_timer = self.create_timer(heartbeat_interval, self.heartbeat)
 
-        self.declare_parameter('bus_numer', 1)
+        self.declare_parameter('bus_number', 1)
         self.declare_parameter('address1', 0x08)
 
         self.bus_number = self.get_parameter('bus_number').get_parameter_value().integer_value

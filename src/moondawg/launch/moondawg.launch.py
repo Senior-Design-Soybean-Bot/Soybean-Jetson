@@ -10,12 +10,6 @@ def generate_launch_description():
             output='screen'
         ),
         Node(
-            package='image_tools',
-            executable='cam2image',
-            name='cam2image',
-            output='screen'
-        ),
-        Node(
             package='ublox_gps',
             executable='ublox_gps_node',
             name='ublox_gps',
@@ -25,7 +19,13 @@ def generate_launch_description():
                 'uart1.baudrate': 9600,
                 'nav_rate': 10,
                 'rate': 10.0,
-            }]
+                'gnss.enable': True,
+                'gnss.enable_gps': True,
+                'gnss.enable_glonass': False,
+                'config_on_startup': True,
+                'debug': 1
+            }],
+            output='screen'
         ),
         Node(
             package='moondawg',
@@ -46,19 +46,13 @@ def generate_launch_description():
         ),
         Node(
             package='moondawg',
-            executable='diagnostics',
-            name='diagnostics',
-            output='screen'
-        ),
-        Node(
-            package='moondawg',
             executable='image_capture',
             name='image_capture',
             output='screen',
-            parameters=[{'image_dir': '/Pictures'},
-                        {'include_date': True}]
+            parameters=[{'camera_indices': [0, 2, 4, 6], 'image_dir': '/Pictures'}]
         )
     ])
 
 if __name__ == '__main__':
     generate_launch_description()
+

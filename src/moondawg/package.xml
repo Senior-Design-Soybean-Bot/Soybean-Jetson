@@ -3,7 +3,7 @@
 <package format="3">
   <name>moondawg</name>
   <version>0.0.1</version>
-  <description>Package running on the Raspberry Pi with ublox GPS support.</description>
+  <description>Package running on a   Jetson with ublox GPS support.</description>
   <maintainer email="andrew.barnes@siu.edu">Andrew Barnes</maintainer>
   <license>Apache-2.0</license>
 
@@ -18,6 +18,7 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>opencv-python</exec_depend>
   <exec_depend>image_tools</exec_depend>
   <exec_depend>ublox_gps</exec_depend>
   <exec_depend>ros2launch</exec_depend>
