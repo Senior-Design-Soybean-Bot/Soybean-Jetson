@@ -1,115 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Robot Control Panel</title>
-    <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f0f0;
-        }
-        .section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .status {
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-        .connected {
-            color: green;
-            background-color: #e8f5e9;
-        }
-        .disconnected {
-            color: red;
-            background-color: #ffebee;
-        }
-        #image-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 10px 0;
-        }
-        .image-box {
-            position: relative;
-            border: 1px solid #ddd;
-            padding: 5px;
-            border-radius: 4px;
-            background-color: white;
-        }
-        .image-box img {
-            width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-        .image-label {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0,0,0,0.7);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        .controller-data {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .gps-coordinates {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-    </style>
+    <title>System Status</title>
+    <script src="roslib.min.js"></script>
 </head>
 <body>
-    <div class="section">
-        <h2>System Status</h2>
-        <p>ROS Bridge: <span id="connection-status" class="status disconnected">Disconnected</span></p>
-        <p>Controller: <span id="controller-status" class="status disconnected">Disconnected</span></p>
-    </div>
+    <h1>System Status</h1>
 
-    <div class="section">
+    <h2>ROS Bridge:</h2>
+    <div id="rosbridge-status">Disconnected</div>
+
+    <h2>Controller:</h2>
+    <div id="controller-status">Disconnected</div>
+
+    <div>
         <h2>Controller Data</h2>
-        <div class="controller-data">
-            <div>
-                <h3>Left Stick</h3>
-                <p>X: <span id="left-stick-x">0</span></p>
-                <p>Y: <span id="left-stick-y">0</span></p>
-            </div>
-            <div>
-                <h3>Right Stick</h3>
-                <p>X: <span id="right-stick-x">0</span></p>
-                <p>Y: <span id="right-stick-y">0</span></p>
-            </div>
-        </div>
-        <div id="button-display">Waiting for input...</div>
+        <h3>Left Stick</h3>
+        <div>X: <span id="left-x">0</span></div>
+        <div>Y: <span id="left-y">0</span></div>
+
+        <h3>Right Stick</h3>
+        <div>X: <span id="right-x">0</span></div>
+        <div>Y: <span id="right-y">0</span></div>
+        <div id="controller-message">Waiting for input...</div>
     </div>
 
-    <div class="section">
+    <div>
         <h2>GPS Coordinates</h2>
-        <div class="gps-coordinates">
-            <p>Latitude: <span id="latitude">--</span></p>
-            <p>Longitude: <span id="longitude">--</span></p>
-            <p>Altitude: <span id="altitude">--</span></p>
-        </div>
+        <div>Latitude: <span id="latitude">--</span></div>
+        <div>Longitude: <span id="longitude">--</span></div>
+        <div>Altitude: <span id="altitude">--</span></div>
     </div>
 
-    <div class="section">
+    <div>
         <h2>Camera Feeds</h2>
-        <div id="image-container">
-            <!-- Images will be dynamically inserted here -->
-        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const robotIP = '127.0.0.1';  // localhost
+                const websocketPort = '9090';
+                const websocketURL = `ws://${robotIP}:${websocketPort}`;
+
+                console.log('Attempting connection to:', websocketURL);
+
+                const ros = new ROSLIB.Ros({
+                    url: websocketURL
+                });
+
+                ros.on('connection', () => {
+                    document.getElementById('rosbridge-status').innerHTML = 'Connected';
+                    console.log('Connected to ROS');
+                });
+
+                ros.on('error', (error) => {
+                    document.getElementById('rosbridge-status').innerHTML = 'Error connecting';
+                    console.error('Error connecting to ROS:', error);
+                });
+
+                ros.on('close', () => {
+                    document.getElementById('rosbridge-status').innerHTML = 'Disconnected';
+                    console.log('Connection closed');
+                    setTimeout(() => {
+                        try {
+                            ros.connect(websocketURL);
+                        } catch(error) {
+                            console.error('Reconnection error:', error);
+                        }
+                    }, 3000);
+                });
+
+            } catch (e) {
+                console.error('Setup error:', e);
+                document.getElementById('rosbridge-status').innerHTML = 'Setup error: ' + e.message;
+            }
+        });
+    </script>
 </body>
 </html>
-
