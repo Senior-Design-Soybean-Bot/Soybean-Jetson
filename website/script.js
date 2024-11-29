@@ -1,139 +1,83 @@
 // Parameters - change these to match the Pi
-const robotIP = '127.0.0.1';  // Using localhost since that's what we confirmed
-const port = '9090';
-const websocketURL = `ws://${robotIP}:${port}`;
+var ip = "131.230.197.82"; 
+var port = "9090"; 
+var url_string = `ws://${ip}:${port}`;
 
-// Initialize variables
-let gamepad_axis_prev = null;
-let gamepad_button_prev = null;
-
-// Single ROS connection
-const ros = new ROSLIB.Ros({
-    url: websocketURL
+// Connect to and set up ros bridge
+var ros = new ROSLIB.Ros({
+    url: url_string
 });
 
-// Connection event handlers
 ros.on('connection', function() {
     console.log('Connected to ROSBridge!');
-    document.getElementById('rosbridge-status').textContent = 'Connected';
-
-    const connectionStatus = new ROSLIB.Message({
-        data: 0
-    });
-
-    setInterval(() => connectionTopic.publish(connectionStatus), 250);
 });
 
 ros.on('error', function(error) {
     console.log('Error connecting to ROSBridge:', error);
-    document.getElementById('rosbridge-status').textContent = 'Error';
 });
 
 ros.on('close', function() {
-    document.getElementById('rosbridge-status').textContent = 'Disconnected';
-    setTimeout(() => ros.connect(websocketURL), 5000);
+    console.log('Connection to ROSBridge closed');
+    setTimeout(() => ros.connect(url_string), 5000);
 });
 
-// Define topics
-const connectionTopic = new ROSLIB.Topic({
-    ros: ros,
-    name: '/connection_status',
-    messageType: 'std_msgs/Byte'
-});
-
-const axisTopic = new ROSLIB.Topic({
+// Define topics based on the Python nodes
+var axisTopic = new ROSLIB.Topic({
     ros: ros,
     name: '/gamepad_axis',
     messageType: 'std_msgs/Int8MultiArray'
 });
 
-const buttonTopic = new ROSLIB.Topic({
+var buttonTopic = new ROSLIB.Topic({
     ros: ros,
-    name: '/gamepad_button',
+    name: '/gamepad_button', 
     messageType: 'std_msgs/Int8MultiArray'
 });
 
-const gpsTopic = new ROSLIB.Topic({
-    ros: ros,
-    name: '/fix',
-    messageType: 'sensor_msgs/NavSatFix'
-});
-
-// Image handling setup
-const NUM_IMAGES = 4;
-const imageContainer = document.getElementById('image-container');
-const imageElements = [];
-
-for (let i = 0; i < NUM_IMAGES; i++) {
-    const imgDiv = document.createElement('div');
-    imgDiv.className = 'image-box';
-    const img = document.createElement('img');
-    img.style.width = '300px';
-    imgDiv.appendChild(img);
-    imageContainer.appendChild(imgDiv);
-    imageElements.push(img);
-}
-
-const imageTopic = new ROSLIB.Topic({
+var imageTopic = new ROSLIB.Topic({
     ros: ros,
     name: '/camera/image/compressed',
     messageType: 'sensor_msgs/CompressedImage'
 });
 
-// Topic subscriptions
-axisTopic.subscribe(function(message) {
-    document.getElementById('left-x').textContent = message.data[0];
-    document.getElementById('left-y').textContent = message.data[1];
-    document.getElementById('right-x').textContent = message.data[2];
-    document.getElementById('right-y').textContent = message.data[3];
-});
-
-buttonTopic.subscribe(function(message) {
-    document.getElementById('controller-message').textContent = 'Button pressed: ' + message.data;
-});
-
-gpsTopic.subscribe(function(message) {
-    document.getElementById('latitude').textContent = message.latitude.toFixed(6);
-    document.getElementById('longitude').textContent = message.longitude.toFixed(6);
-    document.getElementById('altitude').textContent = message.altitude.toFixed(2);
-});
-
+// Subscribe to compressed image topic
 imageTopic.subscribe(function(message) {
-    const imageData = "data:image/jpeg;base64," + message.data;
-
-    for (let i = imageElements.length - 1; i > 0; i--) {
-        imageElements[i].src = imageElements[i-1].src;
-    }
-    imageElements[0].src = imageData;
+    document.getElementById("video_out").src = "data:image/jpeg;base64," + message.data;
 });
 
-// Gamepad handling
+// Connect gamepad
 window.addEventListener("gamepadconnected", function(e) {
-    console.log("Gamepad connected!");
-    document.getElementById('controller-status').textContent = 'Connected';
+    console.log("Gamepad connected:", e.gamepad);
     setInterval(readControllerData, 75);
 });
 
-window.addEventListener("gamepaddisconnected", function(e) {
-    console.log("Gamepad disconnected!");
-    document.getElementById('controller-status').textContent = 'Disconnected';
-});
-
 function readControllerData() {
-    const gamepad = navigator.getGamepads()[0];
+    var gamepad = navigator.getGamepads()[0];
 
     if (!gamepad || !ros.isConnected) {
         return;
     }
 
-    const gamepad_axis = gamepad.axes.map(axis => parseInt(axis.toFixed(2) * 100));
-    const gamepad_button = gamepad.buttons.map(button => parseInt((button.value.toFixed(2) * 100)));
+    // Map axes data - focusing on left stick X/Y as per xbox_translator.py
+    var gamepad_axis = new Int8Array([
+        parseInt(gamepad.axes[0] * 100), // lstick_x
+        parseInt(gamepad.axes[1] * 100)  // lstick_y
+    ]);
 
-    axisTopic.publish(new ROSLIB.Message({
-        data: gamepad_axis
-    }));
+    // Map button data - focusing on dpad left/right for camera control
+    var gamepad_button = new Int8Array(16); // Initialize array with zeros
+    gamepad_button[14] = gamepad.buttons[14] ? 100 : 0; // dpad_left
+    gamepad_button[15] = gamepad.buttons[15] ? 100 : 0; // dpad_right
 
-    buttonTopic.publish(new ROSLIB.Message({
-        data: gamepad_button
-    }));
+    // Publish axis data
+    var axisMsg = new ROSLIB.Message({
+        data: Array.from(gamepad_axis)
+    });
+    axisTopic.publish(axisMsg);
+
+    // Publish button data
+    var buttonMsg = new ROSLIB.Message({
+        data: Array.from(gamepad_button)
+    });
+    buttonTopic.publish(buttonMsg);
 }

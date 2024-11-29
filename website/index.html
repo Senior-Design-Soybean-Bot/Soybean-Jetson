@@ -1,81 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>System Status</title>
-    <script src="roslib.min.js"></script>
+    <title>MoonDawg Control Interface</title>
+    <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .status-panel, .controller-panel, .gps-panel, .camera-panel {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .camera-feed {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>System Status</h1>
+    <div class="container">
+        <!-- System Status Panel -->
+        <div class="status-panel">
+            <h2>System Status</h2>
+            <div>
+                <p>ROS Bridge: <span id="bridge-status">Disconnected</span></p>
+                <p>Controller: <span id="controller-status">Disconnected</span></p>
+            </div>
+        </div>
 
-    <h2>ROS Bridge:</h2>
-    <div id="rosbridge-status">Disconnected</div>
+        <!-- Controller Data Panel -->
+        <div class="controller-panel">
+            <h2>Controller Data</h2>
+            <div>
+                <h3>Left Stick</h3>
+                <p>X: <span id="axis-display">0</span></p>
+                <p>Y: <span id="button-display">0</span></p>
+            </div>
+        </div>
 
-    <h2>Controller:</h2>
-    <div id="controller-status">Disconnected</div>
+        <!-- GPS Panel -->
+        <div class="gps-panel">
+            <h2>GPS Coordinates</h2>
+            <p>Latitude: <span id="gps-lat">--</span></p>
+            <p>Longitude: <span id="gps-lon">--</span></p>
+            <p>Altitude: <span id="gps-alt">--</span></p>
+        </div>
 
-    <div>
-        <h2>Controller Data</h2>
-        <h3>Left Stick</h3>
-        <div>X: <span id="left-x">0</span></div>
-        <div>Y: <span id="left-y">0</span></div>
-
-        <h3>Right Stick</h3>
-        <div>X: <span id="right-x">0</span></div>
-        <div>Y: <span id="right-y">0</span></div>
-        <div id="controller-message">Waiting for input...</div>
+        <!-- Camera Feed Panel -->
+        <div class="camera-panel">
+            <h2>Camera Feed</h2>
+            <img id="video_out" class="camera-feed" src="" alt="Camera Feed">
+        </div>
     </div>
 
-    <div>
-        <h2>GPS Coordinates</h2>
-        <div>Latitude: <span id="latitude">--</span></div>
-        <div>Longitude: <span id="longitude">--</span></div>
-        <div>Altitude: <span id="altitude">--</span></div>
-    </div>
-
-    <div>
-        <h2>Camera Feeds</h2>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const robotIP = '127.0.0.1';  // localhost
-                const websocketPort = '9090';
-                const websocketURL = `ws://${robotIP}:${websocketPort}`;
-
-                console.log('Attempting connection to:', websocketURL);
-
-                const ros = new ROSLIB.Ros({
-                    url: websocketURL
-                });
-
-                ros.on('connection', () => {
-                    document.getElementById('rosbridge-status').innerHTML = 'Connected';
-                    console.log('Connected to ROS');
-                });
-
-                ros.on('error', (error) => {
-                    document.getElementById('rosbridge-status').innerHTML = 'Error connecting';
-                    console.error('Error connecting to ROS:', error);
-                });
-
-                ros.on('close', () => {
-                    document.getElementById('rosbridge-status').innerHTML = 'Disconnected';
-                    console.log('Connection closed');
-                    setTimeout(() => {
-                        try {
-                            ros.connect(websocketURL);
-                        } catch(error) {
-                            console.error('Reconnection error:', error);
-                        }
-                    }, 3000);
-                });
-
-            } catch (e) {
-                console.error('Setup error:', e);
-                document.getElementById('rosbridge-status').innerHTML = 'Setup error: ' + e.message;
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
