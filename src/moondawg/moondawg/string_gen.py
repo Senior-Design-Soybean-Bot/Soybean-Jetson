@@ -3,7 +3,6 @@ from std_msgs.msg import String
 class StringGen():
     
     @staticmethod
-    @staticmethod
     def movement_string(lspeed, rspeed) -> String:
         """
         Returns a string to send to the arduino to control the movement of the wheels.
