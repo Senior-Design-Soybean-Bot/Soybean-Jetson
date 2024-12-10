@@ -1,5 +1,5 @@
 // Parameters - change these to match the Pi
-var ip = "131.230.197.82"; 
+var ip = "10.0.0.4"; 
 var port = "9090"; 
 var url_string = `ws://${ip}:${port}`;
 
