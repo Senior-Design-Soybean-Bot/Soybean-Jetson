@@ -17,11 +17,11 @@ class ImageCapture(Node):
         os.makedirs(self.save_dir, exist_ok=True)
 
         # Create publisher for compressed images
-        self.image_publisher = self.create_publisher(
-            CompressedImage,
-            '/camera/image/compressed',
-            10
-        )
+#        self.image_publisher = self.create_publisher(
+#            CompressedImage,
+#            '/camera/image/compressed',
+#            10
+#        )
 
         self.camera_indices = [0, 2, 4, 6]
         self.cameras = self.initialize_cameras()
@@ -98,16 +98,16 @@ class ImageCapture(Node):
                     continue
 
                 # Create compressed image message
-                msg = CompressedImage()
-                msg.header.stamp = timestamp
-                msg.format = 'jpeg'
+#                msg = CompressedImage()
+#                msg.header.stamp = timestamp
+#                msg.format = 'jpeg'
 
                 # Encode image with JPEG compression
-                _, jpeg_data = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
-                msg.data = np.array(jpeg_data).tobytes()
+#                _, jpeg_data = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+#                msg.data = np.array(jpeg_data).tobytes()
 
                 # Publish compressed image
-                self.image_publisher.publish(msg)
+#                self.image_publisher.publish(msg)
 
                 # Save image
                 self.save_image(frame, camera_id, timestamp)
@@ -141,20 +141,20 @@ class ImageCapture(Node):
         """Handle incoming GPS messages"""
         try:
             # Log all GPS messages for debugging
-            self.get_logger().info(
-                f'GPS message received: lat={msg.latitude:.6f}, '
-                f'lon={msg.longitude:.6f}, alt={msg.altitude:.2f}'
-            )
+#            self.get_logger().info(
+#                f'GPS message received: lat={msg.latitude:.6f}, '
+#                f'lon={msg.longitude:.6f}, alt={msg.altitude:.2f}'
+#            )
 
             # Store GPS data if valid
             if msg.latitude != 0.0 or msg.longitude != 0.0:
                 self.gps_data = msg
-                self.get_logger().info(
-                    f'Valid GPS data stored: lat={msg.latitude:.6f}, '
-                    f'lon={msg.longitude:.6f}'
-                )
-            else:
-                self.get_logger().warn('Invalid GPS data received (0,0)')
+#                self.get_logger().info(
+#                    f'Valid GPS data stored: lat={msg.latitude:.6f}, '
+#                    f'lon={msg.longitude:.6f}'
+#                )
+#            else:
+#                self.get_logger().warn('Invalid GPS data received (0,0)')
 
         except Exception as e:
             self.get_logger().error(f'Error in GPS callback: {str(e)}')

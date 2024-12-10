@@ -50,7 +50,8 @@ class XboxTranslator(Node):
         
         self.axis_subscription = self.create_subscription(Int8MultiArray, 'gamepad_axis', self.axis_callback, 10)
         self.button_subscription = self.create_subscription(Int8MultiArray, 'gamepad_button', self.button_callback, 10)
-        self.i2c_publisher = self.create_publisher(String, 'i2c_topic_1', 10)
+        self.serial_publisher = self.create_publisher(String, '/serial_node/serial', 10)
+        self.get_logger().info('xbox node init')
 
     # called by website, tracks last time connected
     def connection_callback(self, message):
@@ -75,6 +76,7 @@ class XboxTranslator(Node):
         try:
             # Parse the data from the request
             axis = self.parse_axis(request.data)
+#            self.get_logger().info(f'Movement - X: {axis["lstick_x"]}, Y: {axis["lstick_y"]}')
             self.movement_stick_handler(axis)
 
         except Exception as e:
@@ -88,8 +90,10 @@ class XboxTranslator(Node):
         
         self.left_speed = left_speed
         self.right_speed = right_speed
-
-        self.i2c_publisher.publish(StringGen.movement_string(left_speed, right_speed))
+        
+        movement_msg = StringGen.movement_string(left_speed, right_speed)
+#        self.get_logger().info(f'Sending movement: {movement_msg.data}')
+        self.serial_publisher.publish(movement_msg)
     
     def calculate_speed(self, x_axis, y_axis):
         full_forward = self.get_parameter('wheel_full_speed').value
@@ -115,17 +119,17 @@ class XboxTranslator(Node):
             
             if buttons['dpad_left']:
                 self.camera_arm = max(0, self.camera_arm - 5)
-                self.i2c_publisher.publish(StringGen.camera_arm_string(self.camera_arm))
+                self.serial_publisher.publish(StringGen.camera_arm_string(self.camera_arm))
             elif buttons['dpad_right']:
                 self.camera_arm = max(180, self.camera_arm + 5)
-                self.i2c_publisher.publish(StringGen.camera_arm_string(self.camera_arm))
+                self.serial_publisher.publish(StringGen.camera_arm_string(self.camera_arm))
 
         except Exception as e:
             self.get_logger().error("Exception in gamepad button callback:" + str(e))
 
     # called when everything must stop!
     def stop_all(self):
-        self.i2c_publisher.publish(StringGen.movement_string(90,90))
+        self.serial_publisher.publish(StringGen.movement_string(90,90))
 
 
 # start node
